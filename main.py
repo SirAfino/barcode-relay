@@ -15,12 +15,15 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from sys import exit, argv
+from queue import Queue
+from sys import exit
 from _version import __version__
 import logging
 import argparse
 import interception_util
 import yaml
+from interception_device_reader import InterceptionDeviceReader
+from time import sleep
 
 CONFIG_FILEPATH = "config.yml"
 LOGS_FILEPATH = "app.log"
@@ -96,6 +99,27 @@ def main():
         exit(-1)
 
     logger.info("Configuration loaded")
+
+    queue = Queue()
+
+    device_reader = InterceptionDeviceReader(
+        config['device']['hwid_regex'],
+        config['device']['full_scan_regex'],
+        queue
+    )
+
+    device_reader.start()
+
+    # Run loop
+    run = True
+    while run:
+        try:
+            sleep(1)
+        except KeyboardInterrupt:
+            run = False
+
+    device_reader.stop()
+
 
 if __name__ == "__main__":
     main()
