@@ -24,6 +24,7 @@ import interception_util
 import yaml
 from interception_device_reader import InterceptionDeviceReader
 from time import sleep
+from sender import Sender
 
 CONFIG_FILEPATH = "config.yml"
 LOGS_FILEPATH = "app.log"
@@ -108,7 +109,10 @@ def main():
         queue
     )
 
+    sender = Sender(queue)
+
     device_reader.start()
+    sender.start()
 
     # Run loop
     run = True
@@ -119,6 +123,7 @@ def main():
             run = False
 
     device_reader.stop()
+    sender.stop()
 
 
 if __name__ == "__main__":

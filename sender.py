@@ -15,46 +15,45 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-from logging import Logger, getLogger
-from queue import Queue
 from threading import Thread
+from queue import Queue, Empty
+from logging import Logger, getLogger
 
-# Generic device reader class
-class DeviceReader:
+class Sender:
     _logger: Logger
     _run: bool
     _thread: Thread
-    _queue: Queue
-
-    _hwid_regex: str
-    _full_scan_regex: str
+    _queue: Queue = None
     _polling_ms: int
 
-    def __init__(self, hwid_regex: str, full_string_regex: str, queue: Queue, polling_ms: int = 1000) -> None:
+    def __init__(self, queue: Queue, polling_ms: int = 1000):
         self._logger = getLogger()
         self._run = False
         self._thread = None
-        
-        self._hwid_regex = hwid_regex
-        self._full_scan_regex = full_string_regex
+
         self._queue = queue
         self._polling_ms = polling_ms
 
     def start(self):
-        self._logger.info(
-            f"Starting receiver ({self._hwid_regex})"
-        )
+        self._logger.info(f"Starting sender")
         self._run = True
         self._thread = Thread(target=self.run)
         self._thread.start()
-    
+
     def run(self):
+        while self._run:
+            try:
+                (ts, code) = self._queue.get(True, self._polling_ms / 1000.0)
+                self._logger.info(f"Sending scan {code}")
+                self._send(code, ts)
+            except Empty:
+                pass
+
+    def _send(self, code, ts):
         pass
 
     def stop(self):
-        self._logger.info(
-            f"Stopping receiver"
-        )
+        self._logger.info("Stopping sender")
         self._run = False
         if self._thread:
             self._thread.join()
