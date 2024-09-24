@@ -20,6 +20,7 @@ from sys import exit
 from _version import __version__
 import logging
 import argparse
+from device_config import DeviceConfig
 import interception_util
 import yaml
 from interception_device_reader import InterceptionDeviceReader
@@ -105,9 +106,11 @@ def main():
     queue = Queue()
 
     device_reader = InterceptionDeviceReader(
-        config['device']['id'],
-        config['device']['hwid_regex'],
-        config['device']['full_scan_regex'],
+        DeviceConfig(
+            config['device']['id'],
+            config['device']['hwid_regex'],
+            config['device']['full_scan_regex']
+        ),
         queue
     )
 

@@ -20,6 +20,8 @@ from logging import Logger, getLogger
 from queue import Queue
 from threading import Thread
 
+from device_config import DeviceConfig
+
 # Generic device reader class
 class DeviceReader:
     _logger: Logger
@@ -27,26 +29,22 @@ class DeviceReader:
     _thread: Thread
     _queue: Queue
 
-    _id: str
-    _hwid_regex: str
-    _full_scan_regex: str
+    _config: DeviceConfig
     _polling_ms: int
 
-    def __init__(self, id: str, hwid_regex: str, full_string_regex: str, queue: Queue, polling_ms: int = 1000) -> None:
+    def __init__(self, config: DeviceConfig, queue: Queue, polling_ms: int = 1000) -> None:
         self._logger = getLogger()
         self._run = False
         self._thread = None
         
-        self._id = id
-        self._hwid_regex = hwid_regex
-        self._full_scan_regex = full_string_regex
+        self._config = config
         self._queue = queue
         self._polling_ms = polling_ms
 
     def start(self):
         self._logger.info(
-            f"Starting receiver ({json.dumps({ 'id': self._id })})",
-            extra={ 'component': f"READER:{self._id}" }
+            f"Starting receiver",
+            extra={ 'component': 'READER' }
         )
         self._run = True
         self._thread = Thread(target=self.run)
@@ -58,7 +56,7 @@ class DeviceReader:
     def stop(self):
         self._logger.info(
             f"Stopping receiver",
-            extra={ 'component': f"READER:{self._id}" }
+            extra={ 'component': 'READER' }
         )
         self._run = False
         if self._thread:

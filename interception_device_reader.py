@@ -17,14 +17,14 @@ class InterceptionDeviceReader(DeviceReader):
                 interception.interception.is_keyboard(i)
             )
             hwid = device.get_HWID().decode("utf-16")
-            if re.match(self._hwid_regex, hwid) is not None:
+            if re.match(self._config.hwid_regex, hwid) is not None:
                 return i
 
         return -1
     
     def device_filter(self, interception: interception.interception):
         def filter(device):
-            return 1 if re.match(self._hwid_regex, interception.get_HWID(device)) else 0
+            return 1 if re.match(self._config.hwid_regex, interception.get_HWID(device)) else 0
         
         return filter
 
@@ -49,12 +49,12 @@ class InterceptionDeviceReader(DeviceReader):
                 if handle == -1:
                     self._logger.info(
                         f"Device disconnected",
-                        extra={ 'component': f"READER:{self._id}" }
+                        extra={ 'component': 'READER' }
                     )
                 else:
                     self._logger.info(
                         f"Device re/connected",
-                        extra={ 'component': f"READER:{self._id}" }
+                        extra={ 'component': 'READER' }
                     )
                 
                     # Add a filter to capture data from the new device
@@ -81,11 +81,11 @@ class InterceptionDeviceReader(DeviceReader):
             buffer += codeToChar(stroke.code)
 
             # Check if the string is a full scan
-            if re.match(self._full_scan_regex, buffer):
+            if re.match(self._config.full_scan_regex, buffer):
                 ts = int(datetime.now().timestamp())
-                self._queue.put((self._id, buffer, ts))
+                self._queue.put((self._config.id, buffer, ts))
                 self._logger.info(
                     f"Read scan: {json.dumps({'code': buffer})}",
-                    extra={ 'component': f"READER:{self._id}" }
+                    extra={ 'component': f"READER:{self._config.id}" }
                 )
                 buffer = ""
