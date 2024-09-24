@@ -39,7 +39,10 @@ class Sender:
         self._polling_ms = polling_ms
 
     def start(self):
-        self._logger.info(f"Starting sender")
+        self._logger.info(
+            f"Starting sender",
+            extra={ 'component': 'SENDER' }
+        )
         self._run = True
         self._thread = Thread(target=self.run)
         self._thread.start()
@@ -48,7 +51,10 @@ class Sender:
         while self._run:
             try:
                 (device, code, ts) = self._queue.get(True, self._polling_ms / 1000.0)
-                self._logger.info(f"Sending scan {json.dumps({'code': code})}")
+                self._logger.info(
+                    f"Sending scan {json.dumps({'code': code})}",
+                    extra={ 'component': 'SENDER' }
+                )
                 self._send(device, code, ts)
             except Empty:
                 pass
@@ -57,7 +63,10 @@ class Sender:
         pass
 
     def stop(self):
-        self._logger.info("Stopping sender")
+        self._logger.info(
+            "Stopping sender",
+            extra={ 'component': 'SENDER' }
+        )
         self._run = False
         if self._thread:
             self._thread.join()

@@ -45,7 +45,8 @@ class DeviceReader:
 
     def start(self):
         self._logger.info(
-            f"Starting receiver ({json.dumps({ 'id': self._id })})"
+            f"Starting receiver ({json.dumps({ 'id': self._id })})",
+            extra={ 'component': f"READER:{self._id}" }
         )
         self._run = True
         self._thread = Thread(target=self.run)
@@ -56,7 +57,8 @@ class DeviceReader:
 
     def stop(self):
         self._logger.info(
-            f"Stopping receiver"
+            f"Stopping receiver",
+            extra={ 'component': f"READER:{self._id}" }
         )
         self._run = False
         if self._thread:

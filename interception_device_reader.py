@@ -48,11 +48,13 @@ class InterceptionDeviceReader(DeviceReader):
 
                 if handle == -1:
                     self._logger.info(
-                        f"Device disconnected"
+                        f"Device disconnected",
+                        extra={ 'component': f"READER:{self._id}" }
                     )
                 else:
                     self._logger.info(
-                        f"Device re/connected"
+                        f"Device re/connected",
+                        extra={ 'component': f"READER:{self._id}" }
                     )
                 
                     # Add a filter to capture data from the new device
@@ -82,5 +84,8 @@ class InterceptionDeviceReader(DeviceReader):
             if re.match(self._full_scan_regex, buffer):
                 ts = int(datetime.now().timestamp())
                 self._queue.put((self._id, buffer, ts))
-                self._logger.info(f"Read scan: {json.dumps({'code': buffer})}")
+                self._logger.info(
+                    f"Read scan: {json.dumps({'code': buffer})}",
+                    extra={ 'component': f"READER:{self._id}" }
+                )
                 buffer = ""

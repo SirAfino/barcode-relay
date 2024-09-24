@@ -55,7 +55,10 @@ class RedisStreamSender(Sender):
                 sent = True
             except Exception as e:
                 seconds = 5
-                self._logger.info(f"Error while sending message, retry in {seconds}s...")
+                self._logger.info(
+                    f"Error while sending message, retry in {seconds}s...",
+                    extra={ 'component': 'SENDER' }
+                )
                 self._logger.info(e)
                 sleep(seconds)
 
