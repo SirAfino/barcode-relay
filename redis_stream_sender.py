@@ -45,9 +45,9 @@ class RedisStreamSender(Sender):
         )
         self._stream_name = redis_stream
 
-    def _send(self, code, ts):
+    def _send(self, device: str, code: str, ts):
         sent = False
-        data = { 'relay': self._relay_name, 'code': code, 'ts': ts }
+        data = { 'relay': self._relay_name, 'device': device, 'code': code, 'ts': ts }
 
         while self._run and not sent:
             try:

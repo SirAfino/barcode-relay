@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 from device_reader import DeviceReader
 import interception_py.interception as interception
 import re
@@ -80,6 +81,6 @@ class InterceptionDeviceReader(DeviceReader):
             # Check if the string is a full scan
             if re.match(self._full_scan_regex, buffer):
                 ts = int(datetime.now().timestamp())
-                self._queue.put((ts, buffer))
-                self._logger.info(f"Read scan: {buffer}")
+                self._queue.put((self._id, buffer, ts))
+                self._logger.info(f"Read scan: {json.dumps({'code': buffer})}")
                 buffer = ""

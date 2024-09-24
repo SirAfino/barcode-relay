@@ -24,6 +24,7 @@ import interception_util
 import yaml
 from interception_device_reader import InterceptionDeviceReader
 from time import sleep
+from redis_stream_sender import RedisStreamSender
 from sender import Sender
 
 CONFIG_FILEPATH = "config.yml"
@@ -104,12 +105,27 @@ def main():
     queue = Queue()
 
     device_reader = InterceptionDeviceReader(
+        config['device']['id'],
         config['device']['hwid_regex'],
         config['device']['full_scan_regex'],
         queue
     )
 
-    sender = Sender(queue)
+    if config['target']['type'] == 'redis_stream':
+        sender = RedisStreamSender(
+            config['id'],
+            queue,
+            config['target']['host'],
+            config['target']['port'],
+            config['target']['username'],
+            config['target']['password'],
+            config['target']['stream'],
+        )
+    else:
+        sender = Sender(
+            config['id'],
+            queue
+        )
 
     device_reader.start()
     sender.start()

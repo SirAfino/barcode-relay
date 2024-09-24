@@ -47,13 +47,13 @@ class Sender:
     def run(self):
         while self._run:
             try:
-                (ts, code) = self._queue.get(True, self._polling_ms / 1000.0)
+                (device, code, ts) = self._queue.get(True, self._polling_ms / 1000.0)
                 self._logger.info(f"Sending scan {json.dumps({'code': code})}")
-                self._send(code, ts)
+                self._send(device, code, ts)
             except Empty:
                 pass
 
-    def _send(self, code, ts):
+    def _send(self, device, code, ts):
         pass
 
     def stop(self):

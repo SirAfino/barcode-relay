@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
+import json
 from logging import Logger, getLogger
 from queue import Queue
 from threading import Thread
@@ -26,15 +27,17 @@ class DeviceReader:
     _thread: Thread
     _queue: Queue
 
+    _id: str
     _hwid_regex: str
     _full_scan_regex: str
     _polling_ms: int
 
-    def __init__(self, hwid_regex: str, full_string_regex: str, queue: Queue, polling_ms: int = 1000) -> None:
+    def __init__(self, id: str, hwid_regex: str, full_string_regex: str, queue: Queue, polling_ms: int = 1000) -> None:
         self._logger = getLogger()
         self._run = False
         self._thread = None
         
+        self._id = id
         self._hwid_regex = hwid_regex
         self._full_scan_regex = full_string_regex
         self._queue = queue
@@ -42,7 +45,7 @@ class DeviceReader:
 
     def start(self):
         self._logger.info(
-            f"Starting receiver ({self._hwid_regex})"
+            f"Starting receiver ({json.dumps({ 'id': self._id })})"
         )
         self._run = True
         self._thread = Thread(target=self.run)
