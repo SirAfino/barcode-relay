@@ -18,17 +18,17 @@
 # This relay id (sent for each request as the 'relay' field)
 id: relay01
 
-device:
-  # This device id (sent for each request as the 'device' field)
-  id: device01
+devices:
+    # This device id (sent for each request as the 'device' field)
+  - id: device01
 
-  # The regular expression used to match the USB device hardware id,
-  # check the readme on how to get your device hardware id. 
-  hwid_regex: 
-  
-  # The regular expression used to check when a full scan has been
-  # received and send it to the recipients
-  full_scan_regex: .*?\n
+    # The regular expression used to match the USB device hardware id,
+    # check the readme on how to get your device hardware id. 
+    hwid_regex: 
+    
+    # The regular expression used to check when a full scan has been
+    # received and send it to the recipients
+    full_scan_regex: .*?\n
 
 target:
   # The type of output target to send messages to

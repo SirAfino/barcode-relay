@@ -21,6 +21,7 @@ from _version import __version__
 import logging
 import argparse
 from device_config import DeviceConfig
+from interception_multidevice_reader import InterceptionMultiDeviceReader
 import interception_util
 import yaml
 from interception_device_reader import InterceptionDeviceReader
@@ -105,14 +106,15 @@ def main():
 
     queue = Queue()
 
-    device_reader = InterceptionDeviceReader(
-        DeviceConfig(
-            config['device']['id'],
-            config['device']['hwid_regex'],
-            config['device']['full_scan_regex']
-        ),
-        queue
-    )
+    device_configs = []
+    for c in config['devices']:
+        device_configs.append(DeviceConfig(
+            c['id'],
+            c['hwid_regex'],
+            c['full_scan_regex']
+        ))
+
+    device_reader = InterceptionMultiDeviceReader(device_configs, queue)
 
     if config['target']['type'] == 'redis_stream':
         sender = RedisStreamSender(
