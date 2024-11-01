@@ -18,7 +18,7 @@
 from queue import Queue
 from time import sleep
 from redis import Redis
-from sender import Sender
+from .sender import Sender
 
 class RedisStreamSender(Sender):
     """Sender for Redis Stream"""

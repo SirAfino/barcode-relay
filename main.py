@@ -27,7 +27,7 @@ import yaml
 from _version import __version__
 from device_config import DeviceConfig
 import interception_util
-from sender import Sender
+from senders.sender import Sender
 
 CONFIG_FILEPATH = "config.yml"
 LOGS_FILEPATH = "app.log"
@@ -128,7 +128,7 @@ def main():
 
     if config['target']['type'] == 'redis_stream':
         #pylint: disable=import-outside-toplevel
-        from redis_stream_sender import RedisStreamSender
+        from senders.redis_stream_sender import RedisStreamSender
         #pylint: enable=import-outside-toplevel
         sender = RedisStreamSender(
             config['id'],
@@ -159,10 +159,10 @@ def main():
 
     #pylint: disable=import-outside-toplevel
     if os.name == 'nt':
-        from interception_multidevice_reader import InterceptionMultiDeviceReader
+        from readers.interception_multidevice_reader import InterceptionMultiDeviceReader
         device_reader = InterceptionMultiDeviceReader(device_configs, queue)
     else:
-        from multidevice_reader import MultiDeviceReader
+        from readers.multidevice_reader import MultiDeviceReader
         device_reader = MultiDeviceReader(device_configs, queue)
     #pylint: enable=import-outside-toplevel
 
