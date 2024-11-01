@@ -94,7 +94,7 @@ def main():
         else:
             # TODO: implement for linux
             devices = []
-            
+
         for device in devices:
             print(f" - {device}")
 
@@ -139,11 +139,11 @@ def main():
             config['target']['password'],
             config['target']['stream'],
         )
+    elif config['target']['type'] == 'dummy':
+        sender = Sender(config['id'], queue)
     else:
-        sender = Sender(
-            config['id'],
-            queue
-        )
+        logger.error("Invalid target type %s, exiting", config['target']['type'])
+        sys.exit(-1)
 
     if args.test:
         sender.start()
