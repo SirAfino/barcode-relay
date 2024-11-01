@@ -1,17 +1,17 @@
-# 
+#
 # This file is part of the BarcodeRelay distribution (https://github.com/SirAfino/barcode-relay).
 # Copyright (c) 2024 Gabriele Serafino.
-# 
-# This program is free software: you can redistribute it and/or modify  
-# it under the terms of the GNU General Public License as published by  
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, version 3.
 #
-# This program is distributed in the hope that it will be useful, but 
-# WITHOUT ANY WARRANTY; without even the implied warranty of 
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License 
+# You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
@@ -60,7 +60,9 @@ charMap = {
     50: "M"
 }
 
-def codeToChar(code):
+def code_to_char(code):
+    """Converts integer keycode received from keyboard event
+    to the corresponding character, ignores case"""
     if code in charMap:
         return charMap[code]
 
