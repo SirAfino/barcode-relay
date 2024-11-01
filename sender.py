@@ -1,17 +1,17 @@
 # 
 # This file is part of the BarcodeRelay distribution (https://github.com/SirAfino/barcode-relay).
 # Copyright (c) 2024 Gabriele Serafino.
-# 
-# This program is free software: you can redistribute it and/or modify  
-# it under the terms of the GNU General Public License as published by  
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, version 3.
 #
-# This program is distributed in the hope that it will be useful, but 
-# WITHOUT ANY WARRANTY; without even the implied warranty of 
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License 
+# You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
@@ -21,6 +21,7 @@ from logging import Logger, getLogger
 import json
 
 class Sender:
+    """Generic sender"""
     _logger: Logger
     _run: bool
     _thread: Thread
@@ -39,8 +40,9 @@ class Sender:
         self._polling_ms = polling_ms
 
     def start(self):
+        """Start the working thread"""
         self._logger.info(
-            f"Starting sender",
+            "Starting sender",
             extra={ 'component': 'SENDER' }
         )
         self._run = True
@@ -48,11 +50,12 @@ class Sender:
         self._thread.start()
 
     def run(self):
+        """Actual working function"""
         while self._run:
             try:
                 (device, code, ts) = self._queue.get(True, self._polling_ms / 1000.0)
                 self._logger.info(
-                    f"Sending scan {json.dumps({'code': code})}",
+                    "Sending scan %s", json.dumps({'code': code}),
                     extra={ 'component': 'SENDER' }
                 )
                 self._send(device, code, ts)
@@ -63,6 +66,7 @@ class Sender:
         pass
 
     def stop(self):
+        """Stop the working thread"""
         self._logger.info(
             "Stopping sender",
             extra={ 'component': 'SENDER' }

@@ -1,32 +1,33 @@
-# 
+#
 # This file is part of the BarcodeRelay distribution (https://github.com/SirAfino/barcode-relay).
 # Copyright (c) 2024 Gabriele Serafino.
-# 
-# This program is free software: you can redistribute it and/or modify  
-# it under the terms of the GNU General Public License as published by  
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, version 3.
 #
-# This program is distributed in the hope that it will be useful, but 
-# WITHOUT ANY WARRANTY; without even the implied warranty of 
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License 
+# You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
 from queue import Queue
-from sender import Sender
-from redis import Redis
 from time import sleep
+from redis import Redis
+from sender import Sender
 
 class RedisStreamSender(Sender):
+    """Sender for Redis Stream"""
     _redis: Redis
     _stream_name: str
 
     def __init__(
         self,
-        relay_name: str, 
+        relay_name: str,
         queue: Queue,
         redis_host: str,
         redis_port: int,
@@ -56,7 +57,7 @@ class RedisStreamSender(Sender):
             except Exception as e:
                 seconds = 5
                 self._logger.info(
-                    f"Error while sending message, retry in {seconds}s...",
+                    "Error while sending message, retry in %ss...", seconds,
                     extra={ 'component': 'SENDER' }
                 )
                 self._logger.info(e)
