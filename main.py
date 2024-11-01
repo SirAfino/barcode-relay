@@ -16,6 +16,7 @@
 #
 
 import logging
+import logging.handlers
 import argparse
 from time import sleep
 from queue import Queue
@@ -56,7 +57,7 @@ def setup_logger(level = logging.INFO, filepath: str = None):
     logger.setLevel(level)
 
     formatter = logging.Formatter(
-        '%(asctime)s %(levelname)s [%(component)s] [%(uuid)s] %(message)s',
+        '%(asctime)s %(levelname)s [%(component)s] %(message)s',
         defaults={'component': 'APP', 'uuid': ''}
     )
 
@@ -115,6 +116,20 @@ def main():
         sys.exit(-1)
 
     logger.info("Configuration loaded")
+
+    # Setup syslog if configured
+    if config['syslog']:
+        syslog_formatter = logging.Formatter(
+            config['syslog']['log_host'] + ' barcode_relay[%(component)s]: %(message)s',
+            defaults={'component': 'APP', 'uuid': ''}
+        )
+        syslog_handler = logging.handlers.SysLogHandler(
+            facility=logging.handlers.SysLogHandler.LOG_DAEMON,
+            address=(config['syslog']['server_host'], config['syslog']['server_port'])
+        )
+        syslog_handler.setLevel(logging.DEBUG)
+        syslog_handler.setFormatter(syslog_formatter)
+        logger.addHandler(syslog_handler)
 
     queue = Queue()
 
