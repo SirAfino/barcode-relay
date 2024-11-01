@@ -20,3 +20,6 @@ To identify which device is the desired one, you can run the program with the *-
 
 ### Run the program
 *TODO*
+
+## Build .exe
+pyinstaller --noconfirm --onedir --console --icon "barcode.ico" --hidden-import "ctypes"  --name "BarcodeRelay" "main.py"
