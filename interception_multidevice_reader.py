@@ -25,8 +25,8 @@ from multidevice_reader import MultiDeviceReader
 
 class InterceptionMultiDeviceReader(MultiDeviceReader):
     def device_handle_to_device_index(self, _interception: interception.interception, handle: int):
-        for i in enumerate(self._configs):
-            if re.match(self._configs[i].hwid_regex, _interception.get_HWID(handle)):
+        for i, config in enumerate(self._configs):
+            if re.match(config.hwid_regex, _interception.get_HWID(handle)):
                 return i
 
         return -1
@@ -43,10 +43,10 @@ class InterceptionMultiDeviceReader(MultiDeviceReader):
         buffers = ["" for _ in self._configs]
 
         while self._run:
-            for i in enumerate(self._configs):
+            for i, config in enumerate(self._configs):
                 # Get the current device handle and check if its different from
                 # the one we had on the previous cycle
-                new_handle = get_device_handle(self._configs[i].hwid_regex)
+                new_handle = get_device_handle(config.hwid_regex)
                 if not (handles[i] is None or new_handle != handles[i]):
                     continue
 
@@ -55,12 +55,12 @@ class InterceptionMultiDeviceReader(MultiDeviceReader):
                 if handles[i] == -1:
                     self._logger.info(
                         "Device disconnected",
-                        extra={ 'component': f"READER:{self._configs[i].id}" }
+                        extra={ 'component': f"READER:{config.id}" }
                     )
                 else:
                     self._logger.info(
                         "Device re/connected",
-                        extra={ 'component': f"READER:{self._configs[i].id}" }
+                        extra={ 'component': f"READER:{config.id}" }
                     )
 
                     # Add a filter to capture data from the new device
