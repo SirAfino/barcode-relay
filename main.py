@@ -25,9 +25,9 @@ import json
 from datetime import datetime
 import os
 import yaml
+from syslog_rfc5424_formatter import RFC5424Formatter
 from _version import __version__
 from device_config import DeviceConfig
-import interception_util
 from senders.sender import Sender
 
 CONFIG_FILEPATH = "config.yml"
@@ -91,6 +91,7 @@ def main():
     if args.list:
         print("List of attached HID USB devices (Hardware ID):")
         if os.name == "nt":
+            import interception_util
             devices = interception_util.list_keyboard_devices()
         else:
             # TODO: implement for linux
@@ -119,16 +120,14 @@ def main():
 
     # Setup syslog if configured
     if config['syslog']:
-        syslog_formatter = logging.Formatter(
-            config['syslog']['log_host'] + ' barcode_relay[%(component)s]: %(message)s',
-            defaults={'component': 'APP', 'uuid': ''}
-        )
         syslog_handler = logging.handlers.SysLogHandler(
             facility=logging.handlers.SysLogHandler.LOG_DAEMON,
             address=(config['syslog']['server_host'], config['syslog']['server_port'])
         )
         syslog_handler.setLevel(logging.DEBUG)
-        syslog_handler.setFormatter(syslog_formatter)
+        syslog_handler.setFormatter(RFC5424Formatter(
+            'barcode_relay[%(component)s]: %(message)s'
+        ))
         logger.addHandler(syslog_handler)
 
     queue = Queue()
