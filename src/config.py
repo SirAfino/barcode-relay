@@ -46,9 +46,18 @@ class SyslogConfig(BaseModel):
     Syslog logging configuration
     """
 
+    level: str = Field("INFO", pattern="DEBUG|INFO|WARNING|ERROR|CRITICAL")
     server_host: str = Field("127.0.0.1")
     server_port: int = Field(514, ge=1, le=65535)
     log_host: str = Field("barcode-relay")
+
+class LoggingConfig(BaseModel):
+    """
+    Console logging configuration
+    """
+    level: str = Field("INFO", pattern="DEBUG|INFO|WARNING|ERROR|CRITICAL")
+    filepath: str = Field(None)
+    syslog: Optional[SyslogConfig] = None
 
 class AppConfig(BaseModel):
     """
@@ -58,7 +67,7 @@ class AppConfig(BaseModel):
     id: str = Field("barcode-relay")
     devices: List[DeviceConfig]
     target: TargetConfig
-    syslog: Optional[SyslogConfig] = None
+    logging: Optional[LoggingConfig] = LoggingConfig()
 
 def load_configuration(filepath: str):
     """Load working configuration from specified file"""

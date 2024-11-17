@@ -41,11 +41,17 @@ target:
   password: 
   stream: 'scans'
 
-# Syslog logging configuration
-syslog:
-  # Syslog server ip and port
-  server_host: 127.0.0.1
-  server_port: 514
+logging:
+  level: 'INFO'
+  filepath: 'config/app.log'
 
-  # How to populate the host part of the messages
-  log_host: this_device
+  # Syslog logging configuration
+  syslog:
+    level: 'DEBUG'
+    
+    # Syslog server ip and port
+    server_host: 127.0.0.1
+    server_port: 514
+
+    # How to populate the host part of the messages
+    log_host: this_device

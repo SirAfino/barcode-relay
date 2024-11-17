@@ -26,11 +26,14 @@ from datetime import datetime
 import os
 from syslog_rfc5424_formatter import RFC5424Formatter
 from _version import __version__
-from config import SyslogConfig, load_configuration
+from config import LoggingConfig, load_configuration
 from senders.sender import Sender
 
 CONFIG_FILEPATH = "config/config.yml"
-LOGS_FILEPATH = "logs/app.log"
+LOG_FORMATTER = logging.Formatter(
+    '%(asctime)s %(levelname)s [%(component)s] %(message)s',
+    defaults={'component': 'APP', 'uuid': ''}
+)
 
 def license_notice() -> str:
     """Print license notice text"""
@@ -41,26 +44,45 @@ def license_notice() -> str:
         "under certain conditions."
     )
 
-def setup_logger(level = logging.INFO, filepath: str = None):
-    """Setup logger for console and file logging"""
-    logger = logging.getLogger()
-    logger.setLevel(level)
-
-    formatter = logging.Formatter(
-        '%(asctime)s %(levelname)s [%(component)s] %(message)s',
-        defaults={'component': 'APP', 'uuid': ''}
-    )
+def setup_defualt_logger():
+    """Setup default logger for before loading the configuration"""
+    logger = logging.getLogger("default")
+    logger.setLevel(logging.DEBUG)
 
     stream_handler = logging.StreamHandler()
-    stream_handler.setLevel(level)
-    stream_handler.setFormatter(formatter)
+    stream_handler.setLevel(logging.DEBUG)
+    stream_handler.setFormatter(LOG_FORMATTER)
     logger.addHandler(stream_handler)
 
-    if filepath is not None:
-        file_handler = logging.FileHandler(filepath)
-        file_handler.setLevel(level)
-        file_handler.setFormatter(formatter)
+    return logger
+
+def setup_logger(config: LoggingConfig):
+    """Setup logger for console and file logging"""
+    logger = logging.getLogger()
+    logger.setLevel(config.level)
+
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(config.level)
+    stream_handler.setFormatter(LOG_FORMATTER)
+    logger.addHandler(stream_handler)
+
+    if config.filepath is not None:
+        file_handler = logging.FileHandler(config.filepath)
+        file_handler.setLevel(config.level)
+        file_handler.setFormatter(LOG_FORMATTER)
         logger.addHandler(file_handler)
+
+    if config.syslog:
+        syslog_handler = logging.handlers.SysLogHandler(
+            facility=logging.handlers.SysLogHandler.LOG_DAEMON,
+            address=(config.syslog.server_host, config.syslog.server_port)
+        )
+        syslog_handler.setLevel(config.syslog.level)
+        syslog_handler.setFormatter(RFC5424Formatter(
+            'barcode_relay[%(component)s]: %(message)s'
+        ))
+
+        logger.addHandler(syslog_handler)
 
     return logger
 
@@ -86,22 +108,6 @@ def list_devices():
 
     print()
 
-def setup_syslog(config: SyslogConfig):
-    """
-    Initialize syslog logging
-    """
-    syslog_handler = logging.handlers.SysLogHandler(
-        facility=logging.handlers.SysLogHandler.LOG_DAEMON,
-        address=(config.server_host, config.server_port)
-    )
-    syslog_handler.setLevel(logging.DEBUG)
-    syslog_handler.setFormatter(RFC5424Formatter(
-        'barcode_relay[%(component)s]: %(message)s'
-    ))
-
-    logger = logging.getLogger()
-    logger.addHandler(syslog_handler)
-
 def main():
     """Main function"""
     print(license_notice())
@@ -119,7 +125,7 @@ def main():
         list_devices()
         sys.exit(0)
 
-    logger = setup_logger(logging.DEBUG, LOGS_FILEPATH)
+    logger = setup_defualt_logger()
     logger.info('BarcodeRelay - v%s', __version__)
 
     config = load_configuration(CONFIG_FILEPATH)
@@ -131,9 +137,7 @@ def main():
 
     logger.info("Configuration loaded")
 
-    # Setup syslog if configured
-    if config.syslog:
-        setup_syslog(config.syslog)
+    logger = setup_logger(config.logging)
 
     queue = Queue()
 
