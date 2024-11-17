@@ -19,7 +19,7 @@ from logging import Logger, getLogger
 from queue import Queue
 from threading import Thread
 
-from device_config import DeviceConfig
+from config import DeviceConfig
 
 class DeviceReader:
     """Generic device reader"""

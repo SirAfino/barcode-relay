@@ -24,10 +24,9 @@ import sys
 import json
 from datetime import datetime
 import os
-import yaml
 from syslog_rfc5424_formatter import RFC5424Formatter
 from _version import __version__
-from device_config import DeviceConfig
+from config import SyslogConfig, load_configuration
 from senders.sender import Sender
 
 CONFIG_FILEPATH = "config.yml"
@@ -41,15 +40,6 @@ def license_notice() -> str:
         "This is free software, and you are welcome to redistribute it\n"+
         "under certain conditions."
     )
-
-def load_configuration(filepath: str = CONFIG_FILEPATH):
-    """Load working configuration from specified file"""
-    try:
-        with open(filepath, 'r', encoding="utf-8") as file:
-            configuration = yaml.safe_load(file)
-        return configuration
-    except FileNotFoundError:
-        return None
 
 def setup_logger(level = logging.INFO, filepath: str = None):
     """Setup logger for console and file logging"""
@@ -74,6 +64,43 @@ def setup_logger(level = logging.INFO, filepath: str = None):
 
     return logger
 
+def list_devices():
+    """
+    List attached USB keyboard devices
+    """
+    print("List of attached HID USB devices (Hardware ID):")
+    if os.name == "nt":
+        #pylint: disable=import-outside-toplevel
+        import interception_util
+        #pylint: enable=import-outside-toplevel
+        devices = interception_util.list_keyboard_devices()
+    else:
+        # TODO: implement for linux
+        devices = []
+
+    for device in devices:
+        print(f" - {device}")
+
+    if len(devices) == 0:
+        print("   No device found")
+
+    print()
+
+def setup_syslog(config: SyslogConfig):
+    """
+    Initialize syslog logging
+    """
+    syslog_handler = logging.handlers.SysLogHandler(
+        facility=logging.handlers.SysLogHandler.LOG_DAEMON,
+        address=(config.server_host, config.server_port)
+    )
+    syslog_handler.setLevel(logging.DEBUG)
+    syslog_handler.setFormatter(RFC5424Formatter(
+        'barcode_relay[%(component)s]: %(message)s'
+    ))
+
+    logger = logging.getLogger()
+    logger.addHandler(syslog_handler)
 
 def main():
     """Main function"""
@@ -89,27 +116,13 @@ def main():
     args = args_parser.parse_args()
 
     if args.list:
-        print("List of attached HID USB devices (Hardware ID):")
-        if os.name == "nt":
-            import interception_util
-            devices = interception_util.list_keyboard_devices()
-        else:
-            # TODO: implement for linux
-            devices = []
-
-        for device in devices:
-            print(f" - {device}")
-
-        if len(devices) == 0:
-            print("   No device found")
-
-        print()
+        list_devices()
         sys.exit(0)
 
     logger = setup_logger(logging.DEBUG, LOGS_FILEPATH)
     logger.info('BarcodeRelay - v%s', __version__)
 
-    config = load_configuration()
+    config = load_configuration(CONFIG_FILEPATH)
     if config is None:
         logger.error('Error while loading configuration file from "%s".', CONFIG_FILEPATH)
         logger.error('Make sure the configuration file exists \
@@ -119,53 +132,37 @@ def main():
     logger.info("Configuration loaded")
 
     # Setup syslog if configured
-    if config['syslog']:
-        syslog_handler = logging.handlers.SysLogHandler(
-            facility=logging.handlers.SysLogHandler.LOG_DAEMON,
-            address=(config['syslog']['server_host'], config['syslog']['server_port'])
-        )
-        syslog_handler.setLevel(logging.DEBUG)
-        syslog_handler.setFormatter(RFC5424Formatter(
-            'barcode_relay[%(component)s]: %(message)s'
-        ))
-        logger.addHandler(syslog_handler)
+    if config.syslog:
+        setup_syslog(config.syslog)
 
     queue = Queue()
 
-    device_configs = []
-    for c in config['devices']:
-        device_configs.append(DeviceConfig(
-            c['id'],
-            c['hwid_regex'],
-            c['full_scan_regex']
-        ))
-
-    if config['target']['type'] == 'redis_stream':
+    if config.target.type == 'redis_stream':
         #pylint: disable=import-outside-toplevel
         from senders.redis_stream_sender import RedisStreamSender
         #pylint: enable=import-outside-toplevel
         sender = RedisStreamSender(
-            config['id'],
+            config.id,
             queue,
-            config['target']['host'],
-            config['target']['port'],
-            config['target']['username'],
-            config['target']['password'],
-            config['target']['stream'],
+            config.target.host,
+            config.target.port,
+            config.target.username,
+            config.target.password,
+            config.target.stream,
         )
-    elif config['target']['type'] == 'dummy':
-        sender = Sender(config['id'], queue)
+    elif config.target.type == 'dummy':
+        sender = Sender(config.id, queue)
     else:
-        logger.error("Invalid target type %s, exiting", config['target']['type'])
+        logger.error("Invalid target type %s, exiting", config.target.type)
         sys.exit(-1)
 
     if args.test:
         sender.start()
         ts = int(datetime.now().timestamp())
-        queue.put((config['devices'][0]['id'], args.test, ts))
+        queue.put((config.devices[0].id, args.test, ts))
         logger.info(
             "Simulate scan: %s", json.dumps({'code': args.test}),
-            extra={ 'component': f"READER:{config['devices'][0]['id']}" }
+            extra={ 'component': f"READER:{config.devices[0].id}" }
         )
         sleep(1)
         sender.stop()
@@ -174,10 +171,10 @@ def main():
     #pylint: disable=import-outside-toplevel
     if os.name == 'nt':
         from readers.interception_multidevice_reader import InterceptionMultiDeviceReader
-        device_reader = InterceptionMultiDeviceReader(device_configs, queue)
+        device_reader = InterceptionMultiDeviceReader(config.devices, queue)
     else:
         from readers.multidevice_reader import MultiDeviceReader
-        device_reader = MultiDeviceReader(device_configs, queue)
+        device_reader = MultiDeviceReader(config.devices, queue)
     #pylint: enable=import-outside-toplevel
 
     device_reader.start()

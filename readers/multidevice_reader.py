@@ -20,7 +20,7 @@ from queue import Queue
 from threading import Thread
 from typing import List
 
-from device_config import DeviceConfig
+from config import DeviceConfig
 
 # Generic device reader class
 class MultiDeviceReader:
