@@ -22,4 +22,4 @@ To identify which device is the desired one, you can run the program with the *-
 *TODO*
 
 ## Build .exe
-pyinstaller --noconfirm --onedir --console --icon "barcode.ico" --hidden-import "ctypes"  --name "BarcodeRelay" "main.py"
+pyinstaller --noconfirm --onedir --console --icon "assets/barcode.ico" --hidden-import "ctypes"  --name "BarcodeRelay" "src/main.py"

@@ -29,8 +29,8 @@ from _version import __version__
 from config import SyslogConfig, load_configuration
 from senders.sender import Sender
 
-CONFIG_FILEPATH = "config.yml"
-LOGS_FILEPATH = "app.log"
+CONFIG_FILEPATH = "config/config.yml"
+LOGS_FILEPATH = "logs/app.log"
 
 def license_notice() -> str:
     """Print license notice text"""
