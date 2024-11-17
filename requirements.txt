@@ -1,0 +1,4 @@
+pyyaml
+syslog_rfc5424_formatter
+redis
+pydantic
