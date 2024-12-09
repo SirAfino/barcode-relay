@@ -18,25 +18,27 @@
 from logging import Logger, getLogger
 from queue import Queue
 from threading import Thread
+from typing import List
 
-from device_config import DeviceConfig
+from config import DeviceConfig
 
-class DeviceReader:
-    """Generic device reader"""
+# Generic device reader class
+class MultiDeviceReader:
+    """Generic multi-device reader"""
     _logger: Logger
     _run: bool
     _thread: Thread
     _queue: Queue
 
-    _config: DeviceConfig
+    _configs: List[DeviceConfig]
     _polling_ms: int
 
-    def __init__(self, config: DeviceConfig, queue: Queue, polling_ms: int = 1000) -> None:
+    def __init__(self, configs: List[DeviceConfig], queue: Queue, polling_ms: int = 1000) -> None:
         self._logger = getLogger()
         self._run = False
         self._thread = None
 
-        self._config = config
+        self._configs = configs
         self._queue = queue
         self._polling_ms = polling_ms
 
