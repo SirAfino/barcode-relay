@@ -18,9 +18,9 @@
 from datetime import datetime
 import json
 import re
-from .device_reader import DeviceReader
 from interception_py import interception
 from interception_util import get_device_handle, regex_device_filter
+from .device_reader import DeviceReader
 from .keycodes import code_to_char
 
 class InterceptionDeviceReader(DeviceReader):
