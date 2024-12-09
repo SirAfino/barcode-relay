@@ -178,9 +178,8 @@ def main():
         from readers.interception_multidevice_reader import InterceptionMultiDeviceReader
         device_reader = InterceptionMultiDeviceReader(config.devices, queue)
     else:
-        # from readers.multidevice_reader import MultiDeviceReader
-        from readers.evdev_device_reader import EvdevDeviceReader
-        device_reader = EvdevDeviceReader(config.devices[0], queue)
+        from readers.evdev_multidevice_reader import EvdevMultiDeviceReader
+        device_reader = EvdevMultiDeviceReader(config.devices, queue)
     #pylint: enable=import-outside-toplevel
 
     device_reader.start()
