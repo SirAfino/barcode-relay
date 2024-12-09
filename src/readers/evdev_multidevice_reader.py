@@ -15,10 +15,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-# from datetime import datetime
-# import json
-# import re
-
 from datetime import datetime
 import json
 from queue import Queue
