@@ -44,7 +44,7 @@ class DeviceReader:
         """Start the reader thread"""
         self._logger.info(
             "Starting receiver",
-            extra={ 'component': 'READER' }
+            extra={ 'component': f"READER:{self._config.id}" }
         )
         self._run = True
         self._thread = Thread(target=self.run)
@@ -57,7 +57,7 @@ class DeviceReader:
         """Stop the reader thread"""
         self._logger.info(
             "Stopping receiver",
-            extra={ 'component': 'READER' }
+            extra={ 'component': f"READER:{self._config.id}" }
         )
         self._run = False
         if self._thread:

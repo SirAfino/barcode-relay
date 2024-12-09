@@ -46,7 +46,7 @@ class MultiDeviceReader:
         """Start the reader thread"""
         self._logger.info(
             "Starting receiver",
-            extra={ 'component': 'READER' }
+            extra={ 'component': 'READER:multiple' }
         )
         self._run = True
         self._thread = Thread(target=self.run)
@@ -59,7 +59,7 @@ class MultiDeviceReader:
         """Stop the reader thread"""
         self._logger.info(
             "Stopping receiver",
-            extra={ 'component': 'READER' }
+            extra={ 'component': 'READER:multiple' }
         )
         self._run = False
         if self._thread:
