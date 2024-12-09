@@ -91,14 +91,15 @@ def list_devices():
     List attached USB keyboard devices
     """
     print("List of attached HID USB devices (Hardware ID):")
+
+    #pylint: disable=import-outside-toplevel
     if os.name == "nt":
-        #pylint: disable=import-outside-toplevel
         import interception_util
-        #pylint: enable=import-outside-toplevel
         devices = interception_util.list_keyboard_devices()
     else:
-        # TODO: implement for linux
-        devices = []
+        import evdev
+        devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
+    #pylint: enable=import-outside-toplevel
 
     for device in devices:
         print(f" - {device}")
@@ -177,8 +178,9 @@ def main():
         from readers.interception_multidevice_reader import InterceptionMultiDeviceReader
         device_reader = InterceptionMultiDeviceReader(config.devices, queue)
     else:
-        from readers.multidevice_reader import MultiDeviceReader
-        device_reader = MultiDeviceReader(config.devices, queue)
+        # from readers.multidevice_reader import MultiDeviceReader
+        from readers.evdev_device_reader import EvdevDeviceReader
+        device_reader = EvdevDeviceReader(config.devices[0], queue)
     #pylint: enable=import-outside-toplevel
 
     device_reader.start()

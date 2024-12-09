@@ -27,8 +27,8 @@ from time import sleep
 import evdev
 import evdev.events
 
-from device_config import DeviceConfig
 from readers.keycodes import code_to_char
+from config import DeviceConfig
 from .device_reader import DeviceReader
 
 class EvdevDeviceReader(DeviceReader):
