@@ -94,8 +94,8 @@ def main():
             import interception_util
             devices = interception_util.list_keyboard_devices()
         else:
-            # TODO: implement for linux
-            devices = []
+            import evdev
+            devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
 
         for device in devices:
             print(f" - {device}")
@@ -177,7 +177,8 @@ def main():
         device_reader = InterceptionMultiDeviceReader(device_configs, queue)
     else:
         from readers.multidevice_reader import MultiDeviceReader
-        device_reader = MultiDeviceReader(device_configs, queue)
+        from readers.evdev_device_reader import EvdevDeviceReader
+        device_reader = EvdevDeviceReader(device_configs[0], queue)
     #pylint: enable=import-outside-toplevel
 
     device_reader.start()
