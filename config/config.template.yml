@@ -55,3 +55,15 @@ logging:
 
     # How to populate the host part of the messages
     log_host: this_device
+
+hearthbeat:
+  # The type of hearthbeat target to send messages to
+  # Available types: redis_pubsub
+  type: redis_pubsub
+
+  host: 127.0.0.1
+  port: 6379
+  username: 
+  password: 
+  channel: 'hb'
+  interval: 10000 # 10 seconds
