@@ -42,6 +42,18 @@ class EvdevDeviceReader(DeviceReader):
     def __init__(self, config: DeviceConfig, queue: Queue, polling_ms: int = 500) -> None:
         super().__init__(config, queue, polling_ms)
 
+    def _findDevicePath(self):
+        if self._config.hwid_regex is not None:
+            return self._config.hwid_regex
+
+        devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
+        for device in devices:
+            if device.info.vendor == self._config.vid and device.info.product == self._config.pid:
+                return device.path
+
+        print("Not found")
+        return None
+
     def grab(self):
         """
         If device is not already grabbed, try to get device handle and grab the device
@@ -52,7 +64,12 @@ class EvdevDeviceReader(DeviceReader):
             return True
 
         try:
-            self._device = evdev.InputDevice(self._config.hwid_regex)
+            path = self._findDevicePath()
+            if path is None:
+                self._device = None
+                return False
+
+            self._device = evdev.InputDevice(path)
             self._device.grab()
 
             self._grabbed = True

@@ -102,7 +102,7 @@ def list_devices():
     #pylint: enable=import-outside-toplevel
 
     for device in devices:
-        print(f" - {device}")
+        print(f" - {device.name} - VID {device.info.vendor} - PID {device.info.product}")
 
     if len(devices) == 0:
         print("   No device found")

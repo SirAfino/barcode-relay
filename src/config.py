@@ -26,7 +26,9 @@ class DeviceConfig(BaseModel):
     """
 
     id: str = Field(...)
-    hwid_regex: str = Field(...)
+    hwid_regex: Optional[str] = None
+    vid: Optional[int] = None
+    pid: Optional[int] = None
     full_scan_regex: str = Field(".*?\n")
 
 class TargetConfig(BaseModel):
