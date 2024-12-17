@@ -27,6 +27,7 @@ import os
 from syslog_rfc5424_formatter import RFC5424Formatter
 from _version import __version__
 from config import LoggingConfig, load_configuration
+from hearthbeat.redis_pubsub_hearthbeat import RedisPubSubHearthbeat
 from senders.sender import Sender
 
 CONFIG_FILEPATH = "config/config.yml"
@@ -140,6 +141,22 @@ def main():
 
     logger = setup_logger(config.logging)
 
+    hb = None
+    if config.hearthbeat is not None:
+        if config.hearthbeat.type == 'redis_pubsub':
+            hb = RedisPubSubHearthbeat(
+                config.id,
+                config.hearthbeat.host,
+                config.hearthbeat.port,
+                config.hearthbeat.username,
+                config.hearthbeat.password,
+                config.hearthbeat.channel,
+                config.hearthbeat.interval,
+            )
+
+    if hb is not None:
+        hb.start()
+
     queue = Queue()
 
     if config.target.type == 'redis_stream':
@@ -195,6 +212,9 @@ def main():
 
     device_reader.stop()
     sender.stop()
+
+    if hb is not None:
+        hb.stop()
 
 
 if __name__ == "__main__":

@@ -20,6 +20,19 @@ from typing import List, Optional
 import yaml
 from pydantic import BaseModel, ValidationError, Field
 
+class HearthbeatConfig(BaseModel):
+    """
+    Generic - Hearthbeat target configuration
+    """
+
+    type: str = Field("redis_pubsub", pattern="redis_pubsub")
+    host: str = Field("127.0.0.1")
+    port: int = Field(6379, ge=1, le=65535)
+    username: str = Field("")
+    password: str = Field("")
+    channel: str = Field("")
+    interval: int = Field(10000, ge=1)
+
 class DeviceConfig(BaseModel):
     """
     USB Input device configuration
@@ -70,6 +83,7 @@ class AppConfig(BaseModel):
     devices: List[DeviceConfig]
     target: TargetConfig
     logging: Optional[LoggingConfig] = LoggingConfig()
+    hearthbeat: Optional[HearthbeatConfig] = None
 
 def load_configuration(filepath: str):
     """Load working configuration from specified file"""
